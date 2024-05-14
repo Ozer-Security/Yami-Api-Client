@@ -8,6 +8,8 @@ Create your public key
 
     openssl ec -in ecdsa.priv.key -pubout -out ecdsa.public.key
 
+   Send us your public ket to create your account 
+
 Generate your token    
 
     python3 -m virtualenv .venv
