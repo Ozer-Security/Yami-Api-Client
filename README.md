@@ -8,7 +8,7 @@
 
     openssl ec -in ecdsa.priv.key -pubout -out ecdsa.public.key
 
-Send us your public ket to create your account 
+Send us your public key to create your account 
 
 ## Generate your token    
 
