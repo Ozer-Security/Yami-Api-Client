@@ -6,7 +6,7 @@ import sys
 
 def sign(pk_path: Path) -> str:
     pk = pk_path.read_text(encoding='utf-8')
-    payload = {'iat': dt.datetime.now(dt.UTC)}
+    payload = {'iat': dt.datetime.utcnow()}
     return jwt.encode(payload, pk, algorithm='ES256')
 
 
