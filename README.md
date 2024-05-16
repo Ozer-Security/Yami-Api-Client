@@ -22,7 +22,9 @@ Send us your public key to create your account
     curl -X 'GET' '{API_HOST}:{API_PORT}/v1/leaks/query?domain={DOMAIN}&skip=0&limit=0' -H 'accept: application/json' -H 'x-yami-domain: {ACCOUNT}' -H 'x-yami-token: {JWT_TOKEN}'
     
     
+## Extract unique values with jq (example given = email)
 
-
-
+    Pipe your curl command or its output :
+    | jq -r '.result[] | .email'
+    This will output only the emails
 
