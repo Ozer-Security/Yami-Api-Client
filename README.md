@@ -56,7 +56,7 @@ python ./yami-client.py eva002 search-username -s yami-no-kagami.moe # Generate 
 python ./yami-client.py -c eva002 search-username -s yami-no-kagami.moe # Generate a CSV file
 ```
 
-The results of the commandes are saved in the `./query-results` directory.
+The results of the commands are saved in the `./query-results` directory.
 
 ## Commands details
 ### eva001 search-domain
