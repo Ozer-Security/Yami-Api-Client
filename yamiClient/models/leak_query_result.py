@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -12,11 +12,13 @@ class LeakQueryResult:
     Attributes:
         email (str):
         database (str):
+        leak_date (str):
         dataclasses (List[str]):
     """
 
     email: str
     database: str
+    leak_date: Optional[str]
     dataclasses: List[str]
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -27,12 +29,15 @@ class LeakQueryResult:
 
         dataclasses = self.dataclasses
 
+        leak_date = self.leak_date
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 'email': email,
                 'database': database,
+                'leak_date': leak_date,
                 'dataclasses': dataclasses,
             }
         )
@@ -46,11 +51,14 @@ class LeakQueryResult:
 
         database = d.pop('database')
 
+        leak_date = d.pop('leak_date')
+
         dataclasses = cast(List[str], d.pop('dataclasses'))
 
         leak_query_result = cls(
             email=email,
             database=database,
+            leak_date=leak_date,
             dataclasses=dataclasses,
         )
 

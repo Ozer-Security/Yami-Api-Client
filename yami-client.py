@@ -8,6 +8,12 @@ from pathlib import Path
 
 import click
 
+from xlsxRenderer.renderer import (
+    UserNameQueryResult,
+    render_xlsx_hwid_report,
+    render_xlsx_leak_report,
+    render_xlsx_username_report,
+)
 from yamiClient.api.leaks import query_v1_leaks_query_get
 from yamiClient.api.stealers import (
     search_hwid_v1_stealers_hwid_hwid_get,
@@ -40,22 +46,7 @@ class CmdContext:
     domain: str
     priv_key_path: Path
     render_csv: bool = False
-
-
-@dataclass
-class UserNameQueryResult:
-    hwid: str | None
-    telegram: str | None
-    build_id: str | None
-    ip: str | None
-    leak_date: str | None
-    url: str | None
-    user_name: str | None
-    password: str | None
-    credential_type: str | None
-
-    def to_dict(self) -> dict[str, str | None]:
-        return self.__dict__
+    render_xlsx: bool = False
 
 
 BASE_URL = 'http://localhost:8080'
@@ -74,12 +65,11 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 @click.option(
     '-k', '--priv-key-path', type=Path, prompt=True, help='Path to your private key'
 )
-@click.option(
-    '-c', '--render-csv', is_flag=True, help='Activate this flag ffor CSV output'
-)
+@click.option('-c', '--csv', is_flag=True, help='Activate this flag for CSV output')
+@click.option('-x', '--xlsx', is_flag=True, help='Activate this flag for xlsx output')
 @click.pass_context
-def cli(ctx, auth_domain: str, priv_key_path: Path, render_csv: bool):
-    ctx.obj = CmdContext(auth_domain, priv_key_path, render_csv)
+def cli(ctx, auth_domain: str, priv_key_path: Path, csv: bool, xlsx: bool):
+    ctx.obj = CmdContext(auth_domain, priv_key_path, csv, xlsx)
 
 
 @cli.group()
@@ -112,24 +102,39 @@ def search_by_domain(ctx, search_domain: str):
                 logger.info(
                     f'Found {s.total_result_count} leaks for domain {search_domain}'
                 )
-                ext = 'csv' if context.render_csv else 'json'
+                ext = (
+                    'xlsx'
+                    if context.render_xlsx
+                    else 'csv'
+                    if context.render_csv
+                    else 'json'
+                )
                 output_path = OUTPUT_DIR.joinpath(
                     f'leaks_result_{search_domain}_{int(time.time())}.{ext}'
                 )
                 data = [x.to_dict() for x in s.result]
                 if data:
-                    with output_path.open(
-                        'w', encoding='utf-8', newline=''
-                    ) as output_file:
-                        if context.render_csv:
-                            header = list(data[0].keys())
+                    if context.render_xlsx:
+                        data_classes_set = set()
+                        for item in s.result:
+                            data_classes_set |= set(item.dataclasses)
+                        data_classes = sorted(list(data_classes_set))
+                        render_xlsx_leak_report(output_path, s.result, data_classes)
+                    elif context.render_csv:
+                        header = list(data[0].keys())
+                        with output_path.open(
+                            'w', encoding='utf-8', newline=''
+                        ) as output_file:
                             writer = csv.DictWriter(output_file, fieldnames=header)
                             writer.writeheader()
                             for d in data:
                                 classes = ', '.join(d['dataclasses'])
                                 d['dataclasses'] = classes
                                 writer.writerow(d)
-                        else:
+                    else:
+                        with output_path.open(
+                            'w', encoding='utf-8', newline=''
+                        ) as output_file:
                             json.dump(data, output_file, ensure_ascii=False, indent=4)
                     logger.info(f'Query result saved in {output_path}')
 
@@ -158,15 +163,23 @@ def get_by_hwid(ctx, hwid: str):
                 logger.error(e.detail)
             case StealerScalarResult() as s:
                 logger.info(f'Found {s.total_result_count} result for HWID {hwid}')
-                ext = 'csv' if context.render_csv else 'json'
+                ext = (
+                    'xlsx'
+                    if context.render_xlsx
+                    else 'csv'
+                    if context.render_csv
+                    else 'json'
+                )
                 output_path = OUTPUT_DIR.joinpath(
                     f'stealers_result_{hwid}_{int(time.time())}.{ext}'
                 )
                 if s.result:
-                    with output_path.open(
-                        'w', encoding='utf-8', newline=''
-                    ) as output_file:
-                        if context.render_csv:
+                    if context.render_xlsx:
+                        render_xlsx_hwid_report(output_path, s.result)
+                    elif context.render_csv:
+                        with output_path.open(
+                            'w', encoding='utf-8', newline=''
+                        ) as output_file:
                             main_header = [
                                 'hwid',
                                 'telegram',
@@ -275,8 +288,10 @@ def get_by_hwid(ctx, hwid: str):
                                             ]
                                             + [p.url, p.user_name, p.password]
                                         )
-
-                        else:
+                    else:
+                        with output_path.open(
+                            'w', encoding='utf-8', newline=''
+                        ) as output_file:
                             json.dump(
                                 [x.to_dict() for x in s.result],
                                 output_file,
@@ -312,6 +327,11 @@ def search_query(ctx, yql_query: str):
             logger.error(e.detail)
         case [*items]:
             logger.info(f'Found {len(items)} result for query {yql_query}')
+            if context.render_xlsx:
+                logger.warn(
+                    'xlsx renderer not available for raw query results, defaulting to csv render'
+                )
+                context.render_csv = True
             ext = 'csv' if context.render_csv else 'json'
             output_path = OUTPUT_DIR.joinpath(
                 f'stealers_query_result_{int(time.time())}.{ext}'
@@ -393,18 +413,21 @@ def search_username(ctx, username: str):
                             print(item)
     if results:
         logger.info(f'Found {len(results)} result for username {username}')
-        ext = 'csv' if context.render_csv else 'json'
+        ext = 'xlsx' if context.render_xlsx else 'csv' if context.render_csv else 'json'
         output_path = OUTPUT_DIR.joinpath(
             f'stealers_username_{username}_result_{int(time.time())}.{ext}'
         )
-        with output_path.open('w', encoding='utf-8', newline='') as output_file:
-            if context.render_csv:
+        if context.render_xlsx:
+            render_xlsx_username_report(output_path, results)
+        elif context.render_csv:
+            with output_path.open('w', encoding='utf-8', newline='') as output_file:
                 data = [x.to_dict() for x in results]
                 header = list(data[0].keys())
                 writer = csv.DictWriter(output_file, fieldnames=header)
                 writer.writeheader()
                 writer.writerows(data)
-            else:
+        else:
+            with output_path.open('w', encoding='utf-8', newline='') as output_file:
                 json.dump(
                     [x.to_dict() for x in results],
                     output_file,

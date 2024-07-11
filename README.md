@@ -16,7 +16,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 ## Authentication
-Tha Yami authentication require a domain and an ecdsa private key.
+Tha Yami authentication require a domain and a JWT token signed by ecdsa private key. *THE PRIVATE KEY IS USED ONLY LOCALY AND NOT SENT TO THE SERVER*
 These value can be passed in the command line. If they are missing from the command line, they will be prompted.
 
 Command line example:
@@ -34,10 +34,9 @@ Auth domain: example.com
 Priv key path: ./dev.priv
 ```
 
-### About dev.priv
-The key in `dev.priv` is to use solely in dev/demo plateform. The public key associated to this key is alredy registered to a user in the dev/demo database. The auth domain for this key is `example.com`.
-
 ### Create your private key
+As a client of Yami API you must generate your own ECDSA private and public key pair. Once done please communicate your public key tou the YAMI admin.
+
 ```sh
 openssl ecparam -name prime256v1 -genkey -noout -out ecdsa.priv.key
 ```
@@ -48,12 +47,15 @@ openssl ec -in ecdsa.priv.key -pubout -out ecdsa.public.key
 
 ## Output style
 
-Each command can produce either a json or a csv output. The json output is the default one. To generate a csv file pass the `-c` flag to the command line.
+Each command can produce either a json, a csv output or an xlsx. The json output is the default one. To generate a csv file pass the `-c` flag to the command line.
+To generate a csv file pass the `-x` flag to the command line.
 
 ```sh
 python ./yami-client.py eva002 search-username -s yami-no-kagami.moe # Generate a json file
 
 python ./yami-client.py -c eva002 search-username -s yami-no-kagami.moe # Generate a CSV file
+
+python ./yami-client.py -x eva002 search-username -s yami-no-kagami.moe # Generate a XLSX file
 ```
 
 The results of the commands are saved in the `./query-results` directory.
