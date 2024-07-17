@@ -15,6 +15,14 @@ python3 -m virtualenv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+You then need to set the environement variable `YAMI_URL` to the url of yami api.
+
+```sh
+export YAMI_URL=http://127.0.0.1:8080
+```
+
+
 ## Authentication
 Tha Yami authentication require a domain and a JWT token signed by ecdsa private key. *THE PRIVATE KEY IS USED ONLY LOCALY AND NOT SENT TO THE SERVER*
 These value can be passed in the command line. If they are missing from the command line, they will be prompted.

@@ -1,4 +1,5 @@
 import csv
+import os
 import json
 import logging
 import sys
@@ -49,7 +50,7 @@ class CmdContext:
     render_xlsx: bool = False
 
 
-BASE_URL = 'http://localhost:8080'
+BASE_URL = os.environ.get('YAMI_URL', 'http://localhost:8080')
 OUTPUT_DIR = Path('.').parent.joinpath('query-results')
 OUTPUT_DIR.mkdir(exist_ok=True)
 
