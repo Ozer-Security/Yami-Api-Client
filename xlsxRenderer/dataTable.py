@@ -1,17 +1,17 @@
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 from typing import TypeVar
 
 
 T = TypeVar('T', str, int, bool, float, bytes)
 
 
-class ConditionnalFormatting(StrEnum):
-    NONE = 'NONE'
-    BINARY = 'BINARY'
-    GRADIENT = 'GRADIENT'
-    REVERSE_GRADIENT = 'REVERSE_GRADIENT'
-    COLOR_CYCLE = 'COLOR_CYCLE'
+class ConditionnalFormatting(Enum):
+    NONE = 0#'NONE'
+    BINARY = 1#'BINARY'
+    GRADIENT = 2#'GRADIENT'
+    REVERSE_GRADIENT = 3#'REVERSE_GRADIENT'
+    COLOR_CYCLE = 4#'COLOR_CYCLE'
 
 
 @dataclass
