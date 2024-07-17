@@ -9,6 +9,7 @@ This project is a CLI client for Yami API. it is devised in two sub commands gro
     - `hwid` => get a complete stealer record if you know the HWID of the target
     - `search-username` => run a collection of curated YQL queries to search by username in collections FTPCredentials, RDPCredentials and Passwords
     - `query` => run a custom YQL query
+    - 
 ## Installation
 ```sh
 python3 -m virtualenv .venv
@@ -22,9 +23,22 @@ You then need to set the environement variable `YAMI_URL` to the url of yami api
 export YAMI_URL=http://127.0.0.1:8080
 ```
 
+### Create your private key
+As a client of Yami API you must generate your own ECDSA private and public key pair. Once done please communicate your public key tou the YAMI admin.
+
+```sh
+openssl ecparam -name prime256v1 -genkey -noout -out ecdsa.priv.key
+```
+### Create your public key
+```sh
+openssl ec -in ecdsa.priv.key -pubout -out ecdsa.public.key
+```
 
 ## Authentication
-Tha Yami authentication require a domain and a JWT token signed by ecdsa private key. *THE PRIVATE KEY IS USED ONLY LOCALY AND NOT SENT TO THE SERVER*
+Tha Yami authentication require a domain and a JWT token signed by ecdsa private key.
+
+:warning: **THE PRIVATE KEY IS USED ONLY LOCALY AND NOT SENT TO THE SERVER**
+
 These value can be passed in the command line. If they are missing from the command line, they will be prompted.
 
 Command line example:
@@ -42,20 +56,14 @@ Auth domain: example.com
 Priv key path: ./dev.priv
 ```
 
-### Create your private key
-As a client of Yami API you must generate your own ECDSA private and public key pair. Once done please communicate your public key tou the YAMI admin.
-
-```sh
-openssl ecparam -name prime256v1 -genkey -noout -out ecdsa.priv.key
-```
-### Create your public key
-```sh
-openssl ec -in ecdsa.priv.key -pubout -out ecdsa.public.key
-```
-
 ## Output style
 
-Each command can produce either a json, a csv output or an xlsx. The json output is the default one. To generate a csv file pass the `-c` flag to the command line.
+Each command can produce either a json, a csv output or an xlsx. 
+
+The json output is the default one. 
+
+To generate a csv file pass the `-c` flag to the command line.
+
 To generate a csv file pass the `-x` flag to the command line.
 
 ```sh
@@ -69,7 +77,7 @@ python ./yami-client.py -x eva002 search-username -s yami-no-kagami.moe # Genera
 The results of the commands are saved in the `./query-results` directory.
 
 ## Commands details
-### eva001 search-domain
+### eva001 search-domain for leak in forums/sites
 Json output:
 ```sh 
 python ./yami-client.py eva001 search-domain -s yahoo.fr
@@ -100,7 +108,14 @@ email,database,dataclasses
 example1@yahoo.fr,zarafa.com,"email_address, password, salt, userid, username"
 example2@yahoo.fr,zarafa.com,"email_address, password, salt, userid, username"
 ```
-### eva002
+
+Excel output:
+
+![image](https://github.com/user-attachments/assets/4723fb79-4635-42b9-86c1-10fb87474a63)
+
+
+
+### eva002 search for leak in info-stealer
 #### hwid
 Json output:
 ```sh
