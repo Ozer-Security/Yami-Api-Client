@@ -438,5 +438,93 @@ def search_username(ctx, username: str):
         logger.info(f'Query result saved in {output_path}')
 
 
+@eva002.command('search-domain')
+@click.option(
+    '-d',
+    '--domain',
+    type=str,
+    required=True,
+    help='search all Leaks db for a given domain',
+)
+@click.pass_context
+def eva002_search_domain(ctx, domain: str):
+    context: CmdContext = ctx.obj
+    domain = domain.lower()
+    if domain.startswith('http://'):
+        domain = domain[7:]
+    if domain.startswith('https://'):
+        domain = domain[8:]
+    queries = [
+        f'Passwords.Url: ("{domain}", "https://{domain}", "http://{domain}")',
+        f'FTPCredentials.Server: ("{domain}", "https://{domain}", "http://{domain}")',
+        f'RDPCredentials.Server: ("{domain}", "https://{domain}", "http://{domain}")',
+    ]
+    results: list[UserNameQueryResult] = []
+    for query in queries:
+        res = _run_query(context.domain, context.priv_key_path, query)
+        match res:
+            case None | []:
+                logger.info(f'No results found for query {query}')
+            case HTTPValidationError() as e:
+                logger.error(e.detail)
+            case [*items]:
+                for item in items:
+                    match item:
+                        case CredentialItem() as c:
+                            results.append(
+                                UserNameQueryResult(
+                                    hwid=c.hwid,
+                                    telegram=c.telegram,
+                                    build_id=c.build_id,
+                                    ip=c.ip,
+                                    leak_date=c.leak_date,
+                                    url=c.server,
+                                    user_name=c.user_name,
+                                    password=c.password,
+                                    credential_type=c.credential_type,
+                                )
+                            )
+                        case PasswordItem() as p:
+                            results.append(
+                                UserNameQueryResult(
+                                    hwid=p.hwid,
+                                    telegram=p.telegram,
+                                    build_id=p.build_id,
+                                    ip=p.ip,
+                                    leak_date=p.leak_date,
+                                    url=p.url,
+                                    user_name=p.username,
+                                    password=p.password,
+                                    credential_type='Password',
+                                )
+                            )
+                        case _:
+                            print(item)
+    if results:
+        logger.info(f'Found {len(results)} result for domain {domain}')
+        ext = 'xlsx' if context.render_xlsx else 'csv' if context.render_csv else 'json'
+        output_path = OUTPUT_DIR.joinpath(
+            f'stealers_domain_{domain}_result_{int(time.time())}.{ext}'
+        )
+        if context.render_xlsx:
+            render_xlsx_username_report(output_path, results)
+        elif context.render_csv:
+            with output_path.open('w', encoding='utf-8', newline='') as output_file:
+                data = [x.to_dict() for x in results]
+                header = list(data[0].keys())
+                writer = csv.DictWriter(output_file, fieldnames=header)
+                writer.writeheader()
+                writer.writerows(data)
+        else:
+            with output_path.open('w', encoding='utf-8', newline='') as output_file:
+                json.dump(
+                    [x.to_dict() for x in results],
+                    output_file,
+                    ensure_ascii=False,
+                    indent=4,
+                )
+        logger.info(f'Query result saved in {output_path}')
+
+
 if __name__ == '__main__':
     cli()

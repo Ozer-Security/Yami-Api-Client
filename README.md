@@ -8,8 +8,9 @@ This project is a CLI client for Yami API. it is devised in two sub commands gro
   - `eva002`:
     - `hwid` => get a complete stealer record if you know the HWID of the target
     - `search-username` => run a collection of curated YQL queries to search by username in collections FTPCredentials, RDPCredentials and Passwords
+    - `search-domain` => run a collection of curated YQL queries to search by domain in collections FTPCredentials, RDPCredentials and Passwords
     - `query` => run a custom YQL query
-    - 
+
 ## Installation
 ```sh
 python3 -m virtualenv .venv
@@ -164,6 +165,51 @@ XXXXXXXXXXXXXXX,https://t.me/SOURCE,@BradMax,10.0.0.42,10/2/2022 5:45:06 AM,http
 Json output:
 ```sh
 python .\yami-client.py eva002 search-username -u admin     
+```
+
+```json
+[
+    {
+        "hwid": "XXXXXXXXXXXXXXX111",
+        "telegram": "https://t.me/SOURCE",
+        "build_id": "@ggfate",
+        "ip": "10.0.0.42",
+        "leak_date": "6/11/2023 9:58:06 AM",
+        "url": "http://10.40.0.1",
+        "user_name": "admin",
+        "password": "admin",
+        "credential_type": "Password"
+    },
+    {
+        "hwid": "XXXXXXXXXXXXXXX222",
+        "telegram": "https://t.me/SOURCE",
+        "build_id": "@ggfate",
+        "ip": "10.0.73.42",
+        "leak_date": "6/10/2023 9:41:25 PM",
+        "url": "http://192.168.43.168",
+        "user_name": "admin",
+        "password": "admin",
+        "credential_type": "Password"
+    }
+]
+```
+Csv output:
+```sh
+python .\yami-client.py -c eva002 search-username -u admin     
+```
+
+```csv
+hwid,telegram,build_id,ip,leak_date,url,user_name,password,credential_type
+XXXXXXXXXXXXXXX111,https://t.me/SOURCE,@ggfate,10.0.0.42,6/11/2023 9:58:06 AM,http://10.40.0.1,admin,admin,Password
+XXXXXXXXXXXXXXX222,https://t.me/SOURCE,@ggfate,10.0.73.42,6/10/2023 9:41:25 PM,http://192.168.43.168,admin,admin,Password
+
+```
+
+
+#### search-domain
+Json output:
+```sh
+python .\yami-client.py eva002 search-domain -d example.com     
 ```
 
 ```json
