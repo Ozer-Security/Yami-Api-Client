@@ -49,8 +49,15 @@ class CmdContext:
     render_csv: bool = False
     render_xlsx: bool = False
 
-
-BASE_URL = os.environ.get('YAMI_URL', 'http://localhost:8080')
+DEV_URL = 'http://localhost:8080'
+BASE_URL = os.environ.get('YAMI_URL', None)
+IS_DEV = bool(os.environ.get('YAMI_DEV', 0))
+print(os.environ.get('YAMI_DEV', 0))
+if IS_DEV:
+    BASE_URL = DEV_URL
+if BASE_URL is None:
+    logger.error('Please provide the YAMI API base URL in the env var YAMI_URL')
+    sys.exit(1)
 OUTPUT_DIR = Path('.').parent.joinpath('query-results')
 OUTPUT_DIR.mkdir(exist_ok=True)
 
