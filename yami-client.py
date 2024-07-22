@@ -52,7 +52,6 @@ class CmdContext:
 DEV_URL = 'http://localhost:8080'
 BASE_URL = os.environ.get('YAMI_URL', None)
 IS_DEV = bool(os.environ.get('YAMI_DEV', 0))
-print(os.environ.get('YAMI_DEV', 0))
 if IS_DEV:
     BASE_URL = DEV_URL
 if BASE_URL is None:
@@ -60,7 +59,7 @@ if BASE_URL is None:
     sys.exit(1)
 OUTPUT_DIR = Path('.').parent.joinpath('query-results')
 OUTPUT_DIR.mkdir(exist_ok=True)
-
+logger.info(f'Query will target the url {BASE_URL}')
 
 @click.group()
 @click.option(

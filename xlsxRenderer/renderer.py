@@ -116,12 +116,17 @@ class XlsxRenderer:
                             'Last Password Breach Date',
                             'date'
                         }:
-                            worksheet.write_datetime(
-                                row,
-                                col,
-                                datetime.strptime(val, '%Y-%m-%d'),
-                                cell_format=self.formats['date_format'],
-                            )
+                            try: 
+                                worksheet.write_datetime(
+                                    row,
+                                    col,
+                                    datetime.strptime(val, '%Y-%m-%d'),
+                                    cell_format=self.formats['date_format'],
+                                )
+                            except ValueError:
+                                worksheet.write_string(
+                                    row, col, val, cell_format=cell_format
+                                ) 
                         else:
                             worksheet.write_string(
                                 row, col, val, cell_format=cell_format
