@@ -366,17 +366,34 @@ def search_query(ctx, yql_query: str):
     '-u',
     '--username',
     type=str,
-    required=True,
+    default=None,
     help='search all Leaks db for a given username',
 )
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    default=None,
+    help='search all Leaks db for a given username pattern',
+)
 @click.pass_context
-def search_username(ctx, username: str):
+def search_username(ctx, username: str | None, pattern: str | None):
     context: CmdContext = ctx.obj
-    queries = [
-        f'Passwords.Username: "{username}"',
-        f'FTPCredentials.Username: "{username}"',
-        f'RDPCredentials.Username: "{username}"',
-    ]
+    if username is None and pattern is None:
+        logger.error('You must provide either a pattern withh the `-p` option or a username with the `-u` option')
+        sys.exit(1)
+    if username is not None:
+        queries = [
+            f'Passwords.Username: "{username}"',
+            f'FTPCredentials.Username: "{username}"',
+            f'RDPCredentials.Username: "{username}"',
+        ]
+    elif pattern is not None:
+        queries = {
+            f'Passwords.Username match "{pattern}" wildcard *',
+            f'FTPCredentials.Username match "{pattern}" wildcard *',
+            f'RDPCredentials.Username match "{pattern}" wildcard *',
+        }
     results: list[UserNameQueryResult] = []
     for query in queries:
         res = _run_query(context.domain, context.priv_key_path, query)
@@ -419,7 +436,7 @@ def search_username(ctx, username: str):
                         case _:
                             print(item)
     if results:
-        logger.info(f'Found {len(results)} result for username {username}')
+        logger.info(f'Found {len(results)} result for query {query}')
         ext = 'xlsx' if context.render_xlsx else 'csv' if context.render_csv else 'json'
         output_path = OUTPUT_DIR.joinpath(
             f'stealers_username_{username}_result_{int(time.time())}.{ext}'
@@ -449,22 +466,39 @@ def search_username(ctx, username: str):
     '-d',
     '--domain',
     type=str,
-    required=True,
+    default=None,
     help='search all Leaks db for a given domain',
 )
+@click.option(
+    '-p',
+    '--pattern',
+    type=str,
+    default=None,
+    help='search all Leaks db for a given domain pattern',
+)
 @click.pass_context
-def eva002_search_domain(ctx, domain: str):
+def eva002_search_domain(ctx, domain: str | None, pattern: str | None):
     context: CmdContext = ctx.obj
-    domain = domain.lower()
-    if domain.startswith('http://'):
-        domain = domain[7:]
-    if domain.startswith('https://'):
-        domain = domain[8:]
-    queries = [
-        f'Passwords.Url: ("{domain}", "https://{domain}", "http://{domain}")',
-        f'FTPCredentials.Server: ("{domain}", "https://{domain}", "http://{domain}")',
-        f'RDPCredentials.Server: ("{domain}", "https://{domain}", "http://{domain}")',
-    ]
+    if domain is None and pattern is None:
+        logger.error('You must provide either a pattern withh the `-p` option or a domain with the `-d` option')
+        sys.exit(1)
+    if domain is not None:
+        domain = domain.lower()
+        if domain.startswith('http://'):
+            domain = domain[7:]
+        if domain.startswith('https://'):
+            domain = domain[8:]
+        queries = [
+            f'Passwords.Url: ("{domain}", "https://{domain}", "http://{domain}")',
+            f'FTPCredentials.Server: ("{domain}", "https://{domain}", "http://{domain}")',
+            f'RDPCredentials.Server: ("{domain}", "https://{domain}", "http://{domain}")',
+        ]
+    elif pattern is not None:
+        queries = [
+            f'Passwords.Url match "{pattern}" wildcard *',
+            f'FTPCredentials.Server match "{pattern}" wildcard *',
+            f'RDPCredentials.Server match "{pattern}" wildcard *',
+        ]
     results: list[UserNameQueryResult] = []
     for query in queries:
         res = _run_query(context.domain, context.priv_key_path, query)
@@ -507,7 +541,7 @@ def eva002_search_domain(ctx, domain: str):
                         case _:
                             print(item)
     if results:
-        logger.info(f'Found {len(results)} result for domain {domain}')
+        logger.info(f'Found {len(results)} result for query {query}')
         ext = 'xlsx' if context.render_xlsx else 'csv' if context.render_csv else 'json'
         output_path = OUTPUT_DIR.joinpath(
             f'stealers_domain_{domain}_result_{int(time.time())}.{ext}'
