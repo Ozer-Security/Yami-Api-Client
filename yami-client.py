@@ -435,11 +435,12 @@ def search_username(ctx, username: str | None, pattern: str | None):
                             )
                         case _:
                             print(item)
+                logger.info(f'Found {len(items)} result for query {query}')
     if results:
-        logger.info(f'Found {len(results)} result for query {query}')
+        logger.info(f'Found {len(results)} result for user {username if username is not None else pattern}')
         ext = 'xlsx' if context.render_xlsx else 'csv' if context.render_csv else 'json'
         output_path = OUTPUT_DIR.joinpath(
-            f'stealers_username_{username}_result_{int(time.time())}.{ext}'
+            f'stealers_username_{username if username is not None else pattern.replace("*", "")}_result_{int(time.time())}.{ext}'
         )
         if context.render_xlsx:
             render_xlsx_username_report(output_path, results)
@@ -540,11 +541,12 @@ def eva002_search_domain(ctx, domain: str | None, pattern: str | None):
                             )
                         case _:
                             print(item)
+                logger.info(f'Found {len(items)} result for query {query}')
     if results:
-        logger.info(f'Found {len(results)} result for query {query}')
+        logger.info(f'Found {len(results)} result for domain {domain if domain is not None else pattern}')
         ext = 'xlsx' if context.render_xlsx else 'csv' if context.render_csv else 'json'
         output_path = OUTPUT_DIR.joinpath(
-            f'stealers_domain_{domain}_result_{int(time.time())}.{ext}'
+            f'stealers_domain_{domain if domain is not None else pattern.replace("*", "")}_result_{int(time.time())}.{ext}'
         )
         if context.render_xlsx:
             render_xlsx_username_report(output_path, results)
