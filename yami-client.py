@@ -6,6 +6,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from dotenv import load_dotenv
 
 import click
 
@@ -49,6 +50,7 @@ class CmdContext:
     render_csv: bool = False
     render_xlsx: bool = False
 
+load_dotenv()
 DEV_URL = 'http://localhost:8080'
 BASE_URL = os.environ.get('YAMI_URL', None)
 IS_DEV = bool(os.environ.get('YAMI_DEV', 0))
