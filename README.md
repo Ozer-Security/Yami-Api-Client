@@ -18,7 +18,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-You then need to set the environement variable `YAMI_URL` to the url of yami api, put url given by us in the .env file.
+You then need to set the environement variable `YAMI_URL` to the url of yami api, put url given by us in the `.env` file.
 
 ```sh
 YAMI_URL=http://127.0.0.1:8080
