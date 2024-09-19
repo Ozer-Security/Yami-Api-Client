@@ -44,7 +44,7 @@ These value can be passed in the command line. If they are missing from the comm
 
 Command line example:
 ```sh 
-python ./yami-client.py -d example.com -k ./dev.priv eva001 search-domain -s yami-no-kagami.moe
+python ./yami-client.py -d USER -k ./dev.priv eva001 search-domain -s yami-no-kagami.moe
 ```
 
 Prompt example:
@@ -65,7 +65,7 @@ The json output is the default one.
 
 To generate a csv file pass the `-c` flag to the command line.
 
-To generate a csv file pass the `-x` flag to the command line.
+To generate a excel file pass the `-x` flag to the command line.
 
 ```sh
 python ./yami-client.py eva002 search-username -s yami-no-kagami.moe # Generate a json file
